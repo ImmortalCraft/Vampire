@@ -1,33 +1,35 @@
 package net.immortalcraft.vampire;
 
-import org.bukkit.Bukkit;
-
 import com.massivecraft.mcore.Aspect;
 import com.massivecraft.mcore.AspectColl;
 import com.massivecraft.mcore.MPlugin;
-import net.immortalcraft.vampire.cmd.CmdBase;
+import net.immortalcraft.vampire.cmd.CmdVampire;
+import net.immortalcraft.vampire.entity.MConfColl;
+import net.immortalcraft.vampire.entity.MLangColl;
+import net.immortalcraft.vampire.entity.UConfColls;
+import net.immortalcraft.vampire.entity.UPlayerColls;
 
-public class P extends MPlugin 
+public class Vampire extends MPlugin 
 {
 	// -------------------------------------------- //
 	// INSTANCE & CONSTRUCT
 	// -------------------------------------------- //
 	
-	public static P p;
-	public static P get() { return p; }
-	public P() { P.p = this; }
+	private static Vampire i;
+	public static Vampire get() { return i; }
+	public Vampire() { Vampire.i = this; }
 	
 	// -------------------------------------------- //
 	// FIELDS
 	// -------------------------------------------- //
 	
-	// Commands
-	public CmdBase cmdBase;
-	
 	// Aspects
 	public Aspect playerAspect;
 	public Aspect configAspect;
 	
+	// Commands
+	public CmdVampire cmdBase;
+
 	// -------------------------------------------- //
 	// OVERRIDE
 	// -------------------------------------------- //
@@ -37,43 +39,40 @@ public class P extends MPlugin
 	{
 		if ( ! preEnable()) return;
 		
-		// Init aspects
-		this.playerAspect = AspectColl.get().get(Const.playerAspectId, true);
+		// Aspects
+		this.playerAspect = AspectColl.get().get(Const.ASPECT_PLAYER, true);
 		this.playerAspect.register();
 		this.playerAspect.setDesc(
 			"<i>Everything player related:", 
 			"<i>Is the player a vampire or not?",
 			"<i>What was the infection reason?",
-			"<i>Check <h>"+Const.configAspectId+" <i>for rules and balancing."
+			"<i>Check <h>"+Const.ASPECT_CONF+" <i>for rules and balancing."
 		);
 		
-		this.configAspect = AspectColl.get().get(Const.configAspectId, true);
+		this.configAspect = AspectColl.get().get(Const.ASPECT_CONF, true);
 		this.configAspect.register();
 		this.configAspect.setDesc(
 			"<i>Config options for balancing:", 
 			"<i>What is the splash potion radius for holy water?",
 			"<i>What items are considered wooden stakes?",
-			"<i>Check <h>"+Const.playerAspectId+" <i>for player state."
+			"<i>Check <h>"+Const.ASPECT_PLAYER+" <i>for player state."
 		);
 		
-		// Load Conf from disk
-		Lang.i.load();
-		ConfServer.i.load();
-		ConfColls.i.init();
-		VPlayerColls.i.init();
+		// Database
+		MConfColl.get().init();
+		MLangColl.get().init();
+		UConfColls.get().init();
+		UPlayerColls.get().init();
 		
-		// Initialize collections
-		// VPlayerColl.i.init();
+		// Commands
+		this.cmdBase = new CmdVampire();
+		this.cmdBase.register();
 		
-		// Add Base Commands
-		this.cmdBase = new CmdBase();
-		this.cmdBase.register(this, true);
-		
-		// Start timer
-		Bukkit.getScheduler().scheduleSyncRepeatingTask(this, new TheTask(), 0, ConfServer.taskInterval);
+		// Tasks
+		TheTask.get().schedule(this);
 	
-		// Register events
-		new TheListener(this);
+		// Listeners
+		ListenerMain.get().activate();
 		
 		postEnable();
 	}

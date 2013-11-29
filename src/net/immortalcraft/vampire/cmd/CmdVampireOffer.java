@@ -1,7 +1,5 @@
 package net.immortalcraft.vampire.cmd;
 
-import net.immortalcraft.vampire.VPlayer;
-import net.immortalcraft.vampire.VPerm;
 import org.bukkit.entity.Player;
 
 import com.massivecraft.mcore.cmd.arg.ARDouble;
@@ -9,26 +7,39 @@ import com.massivecraft.mcore.cmd.arg.ARPlayer;
 import com.massivecraft.mcore.cmd.req.ReqHasPerm;
 import com.massivecraft.mcore.cmd.req.ReqIsPlayer;
 import com.massivecraft.mcore.util.MUtil;
+import net.immortalcraft.vampire.*;
+import net.immortalcraft.vampire.entity.UPlayer;
 
-public class CmdOffer extends VCommand
+public class CmdVampireOffer extends VCommand
 {
-	public CmdOffer()
+	// -------------------------------------------- //
+	// CONSTRUCT
+	// -------------------------------------------- //
+	
+	public CmdVampireOffer()
 	{
+		// Aliases
 		this.addAliases("o", "offer");
 		
+		// Args
 		this.addRequiredArg("playername");
 		this.addOptionalArg("amount", "4.0");
 		
-		this.addRequirements(ReqHasPerm.get(VPerm.TRADE_OFFER.node));
+		// Requirements
+		this.addRequirements(ReqHasPerm.get(Perm.TRADE_OFFER.node));
 		this.addRequirements(ReqIsPlayer.get());
 	}
+	
+	// -------------------------------------------- //
+	// OVERRIDE
+	// -------------------------------------------- //
 	
 	@Override
 	public void perform()
 	{
 		Player you = this.arg(0, ARPlayer.getStart());
 		if (you == null) return;
-		VPlayer vyou = VPlayer.get(you);
+		UPlayer vyou = UPlayer.get(you);
 		
 		Double unlimitedAmount = this.arg(1, ARDouble.get(), 4D);
 		if (unlimitedAmount == null) return;
@@ -42,4 +53,5 @@ public class CmdOffer extends VCommand
 		
 		vme.tradeOffer(vyou, amount);
 	}
+	
 }

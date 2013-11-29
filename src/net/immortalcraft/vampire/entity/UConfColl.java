@@ -1,17 +1,18 @@
-package net.immortalcraft.vampire;
+package net.immortalcraft.vampire.entity;
 
 import com.massivecraft.mcore.store.Coll;
 import com.massivecraft.mcore.store.MStore;
+import net.immortalcraft.vampire.Vampire;
 
-public class ConfColl extends Coll<Conf>
+public class UConfColl extends Coll<UConf>
 {
 	// -------------------------------------------- //
 	// CONSTRUCT
 	// -------------------------------------------- //
 	
-	public ConfColl(String name)
+	public UConfColl(String name)
 	{
-		super(name, Conf.class, MStore.getDb(ConfServer.dburi), P.p, false, true, false);
+		super(name, UConf.class, MStore.getDb(), Vampire.get(), false, true, false);
 	}
 	
 	// -------------------------------------------- //

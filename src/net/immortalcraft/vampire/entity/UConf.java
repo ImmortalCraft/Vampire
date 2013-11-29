@@ -1,4 +1,4 @@
-package net.immortalcraft.vampire;
+package net.immortalcraft.vampire.entity;
 
 import java.util.HashMap;
 import java.util.List;
@@ -15,27 +15,27 @@ import org.bukkit.inventory.ItemStack;
 
 import com.massivecraft.mcore.store.Entity;
 import com.massivecraft.mcore.util.MUtil;
+import net.immortalcraft.vampire.PotionEffectConf;
 import net.immortalcraft.vampire.altar.AltarDark;
 import net.immortalcraft.vampire.altar.AltarLight;
 
-public class Conf extends Entity<Conf>
+public class UConf extends Entity<UConf>
 {
-	
 	// -------------------------------------------- //
 	// META
 	// -------------------------------------------- //
 	
-	public static Conf get(Object worldNameExtractable)
+	public static UConf get(Object oid)
 	{
-		return ConfColls.i.get2(worldNameExtractable);
+		return UConfColls.get().get2(oid);
 	}
 	
 	// -------------------------------------------- //
 	// FX
 	// -------------------------------------------- //
 	
-	public double fxSmokePerTick = 0.40D;
-	public double fxEnderPerTick = 0.10D;
+	public double fxSmokePerMilli = 8D / 1000D; // 8 smokes per second
+	public double fxEnderPerMilli = 2D / 1000D; // 2 enders per second
 	public int fxEnderRandomMaxLen = 1;
 	public double fxSmokeBurstCount = 30D;
 	public double fxFlameBurstCount = 5D;
@@ -99,7 +99,7 @@ public class Conf extends Entity<Conf>
 	// -------------------------------------------- //
 	
 	public double bloodlustMinFood = 2.5D;
-	public double bloodlustFoodPerTick = -0.015D;
+	public double bloodlustFoodPerMilli = -20D / (30D * 1000D); // You can bloodlust for 30 seconds
 	public double bloodlustSmokes = 1.5D;
 	
 	// -------------------------------------------- //
@@ -137,7 +137,7 @@ public class Conf extends Entity<Conf>
 	
 	public double regenMinFood = 2.5D;
 	public int regenDelayMillis = 10*1000;
-	public double regenFoodPerTick = 0.025D;
+	public double regenFoodPerMilli = 0.5D / 1000D; // Regen 0.5 food per second
 	public double regenHealthPerFood = 2D;
 	
 	// -------------------------------------------- //
@@ -145,7 +145,7 @@ public class Conf extends Entity<Conf>
 	// -------------------------------------------- //
 	
 	// One minute
-	public long truceBreakTicks = 60 * 20; 
+	public long truceBreakMillis = 60L * 1000L; 
 	
 	// These are the creature types that won't target vampires
 	public Set<EntityType> truceEntityTypes = MUtil.set(
@@ -161,7 +161,6 @@ public class Conf extends Entity<Conf>
 		EntityType.SPIDER,
 		EntityType.ZOMBIE
 	);
-
 	
 	// -------------------------------------------- //
 	// COMBAT
@@ -194,7 +193,7 @@ public class Conf extends Entity<Conf>
 	// -------------------------------------------- //
 	
 	// It will take you 1h to turn
-	public double infectionPerTick = 1D / (20*60*60D);
+	public double infectionPerMilli = 1D / (1000D * 60D * 60D);
 	
 	public int infectionProgressNauseaTicks = 12*20;
 	public int infectionProgressDamage = 1;
@@ -263,7 +262,7 @@ public class Conf extends Entity<Conf>
 	
 	public double opacityPerArmorPiece = 0.125d;
 	public double baseRad = -0.2d;
-	public double tempPerRadAndTick = 1d / (10d * 20d); // it should take 10 seconds to reach max temp in maximum sunlight.
+	public double tempPerRadAndMilli = 1d / (10d * 1000d); // it should take 10 seconds to reach max temp in maximum sunlight.
 	
 	public double sunNauseaTemp = 0.20d;
 	public double sunWeaknessTemp = 0.30d;
@@ -277,8 +276,8 @@ public class Conf extends Entity<Conf>
 	public int sunBlindnessTicks = 10*20;
 	public int sunBurnTicks = 3*20;	
 	
-	public double sunSmokesPerTempAndTick = 0.60d;
-	public double sunFlamesPerTempAndTick = 0.02d;
+	public double sunSmokesPerTempAndMilli = 12D / 1000D; // 12 smokes per second in full sunlight
+	public double sunFlamesPerTempAndMilli = 0.4D / 1000D; // 0.4 flames every second in full sunlight
 	
 	//We assume opacity 1 for all materials not in this map
 	private final static transient Double AIR = 0D;

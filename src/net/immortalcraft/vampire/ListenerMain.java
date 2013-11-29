@@ -15,6 +15,7 @@ import org.bukkit.entity.Projectile;
 import org.bukkit.entity.ThrownPotion;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
+import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
@@ -39,19 +40,33 @@ import com.massivecraft.mcore.MCore;
 import com.massivecraft.mcore.integration.protocollib.MCoreEntityPotionColorEvent;
 import com.massivecraft.mcore.util.MUtil;
 import com.massivecraft.mcore.util.PlayerUtil;
+import net.immortalcraft.vampire.entity.MLang;
+import net.immortalcraft.vampire.entity.UConf;
+import net.immortalcraft.vampire.entity.UPlayer;
 import net.immortalcraft.vampire.util.FxUtil;
 
-public class TheListener implements Listener
+public class ListenerMain implements Listener
 {
 	// -------------------------------------------- //
-	// META
+	// INSTANCE & CONSTRUCT
 	// -------------------------------------------- //
 	
-	public P p;
-	public TheListener(P p)
+	private static ListenerMain i = new ListenerMain();
+	public static ListenerMain get() { return i; }
+	public ListenerMain() {}
+	
+	// -------------------------------------------- //
+	// ACTIVATE & DEACTIVATE
+	// -------------------------------------------- //
+	
+	public void activate()
 	{
-		this.p = p;
-		Bukkit.getServer().getPluginManager().registerEvents(this, p);
+		Bukkit.getServer().getPluginManager().registerEvents(this, Vampire.get());
+	}
+	
+	public void deactivate()
+	{
+		HandlerList.unregisterAll(this);
 	}
 	
 	// -------------------------------------------- //
@@ -64,32 +79,32 @@ public class TheListener implements Listener
 		if (!(entity instanceof Player)) return;
 		
 		Player player = (Player)entity;
-		VPlayer vplayer = VPlayer.get(player);
-		Conf conf = Conf.get(player);
+		UPlayer uplayer = UPlayer.get(player);
+		UConf uconf = UConf.get(player);
 		
-		if (vplayer.isHuman())
+		if (uplayer.isHuman())
 		{
-			conf.effectConfHuman.applyFor(event, eventPriority);
+			uconf.effectConfHuman.applyFor(event, eventPriority);
 		}
 		
-		if (vplayer.isInfected())
+		if (uplayer.isInfected())
 		{
-			conf.effectConfInfected.applyFor(event, eventPriority);
+			uconf.effectConfInfected.applyFor(event, eventPriority);
 		}
 		
-		if (vplayer.isVampire())
+		if (uplayer.isVampire())
 		{
-			conf.effectConfVampire.applyFor(event, eventPriority);
+			uconf.effectConfVampire.applyFor(event, eventPriority);
 		}
 		
-		if (vplayer.isVampire() && conf.nightvisionCanBeUsed && vplayer.isUsingNightVision())
+		if (uplayer.isVampire() && uconf.nightvisionCanBeUsed && uplayer.isUsingNightVision())
 		{
-			conf.effectConfNightvision.applyFor(event, eventPriority);
+			uconf.effectConfNightvision.applyFor(event, eventPriority);
 		}
 		
-		if (vplayer.isVampire() && vplayer.isBloodlusting())
+		if (uplayer.isVampire() && uplayer.isBloodlusting())
 		{
-			conf.effectConfBloodlust.applyFor(event, eventPriority);
+			uconf.effectConfBloodlust.applyFor(event, eventPriority);
 		}
 	}
 	
@@ -131,14 +146,14 @@ public class TheListener implements Listener
 	public void fxOnDeath(EntityDeathEvent event)
 	{
 		// If a vampire dies ...
-		VPlayer vplayer = VPlayer.get(event.getEntity());
-		if (vplayer == null) return;
-		if (vplayer.isVampire() == false) return;
+		UPlayer uplayer = UPlayer.get(event.getEntity());
+		if (uplayer == null) return;
+		if (uplayer.isVampire() == false) return;
 		
 		// ... burns up with a violent scream ;,,;
-		vplayer.runFxShriek();
-		vplayer.runFxFlameBurst();
-		vplayer.runFxSmokeBurst();
+		uplayer.runFxShriek();
+		uplayer.runFxFlameBurst();
+		uplayer.runFxSmokeBurst();
 	}
 	
 	// -------------------------------------------- //
@@ -149,30 +164,30 @@ public class TheListener implements Listener
 	public void blockEvents(EntityDamageEvent event)
 	{
 		Entity entity = event.getEntity();
-		Conf conf = Conf.get(entity);
+		UConf uconf = UConf.get(entity);
 		
 		if ( ! (entity instanceof Player)) return;
-		if ( ! conf.blockDamageFrom.contains(event.getCause())) return;
+		if ( ! uconf.blockDamageFrom.contains(event.getCause())) return;
 		
 		Player player = (Player)entity;
-		VPlayer vplayer = VPlayer.get(player);
+		UPlayer uplayer = UPlayer.get(player);
 		
-		if (vplayer.isVampire()) event.setCancelled(true);
+		if (uplayer.isVampire()) event.setCancelled(true);
 	}
 	
 	@EventHandler(priority = EventPriority.NORMAL, ignoreCancelled = true)
 	public void blockEvents(EntityRegainHealthEvent event)
 	{
 		Entity entity = event.getEntity();
-		Conf conf = Conf.get(entity);
+		UConf uconf = UConf.get(entity);
 		
 		if ( ! (entity instanceof Player)) return;
-		if ( ! conf.blockHealthFrom.contains(event.getRegainReason())) return;
+		if ( ! uconf.blockHealthFrom.contains(event.getRegainReason())) return;
 		
 		Player player = (Player) entity;		
-		VPlayer vplayer = VPlayer.get(player);
+		UPlayer uplayer = UPlayer.get(player);
 		
-		if (vplayer.isVampire()) event.setCancelled(true);
+		if (uplayer.isVampire()) event.setCancelled(true);
 	}
 	
 	@EventHandler(priority = EventPriority.NORMAL, ignoreCancelled = true)
@@ -182,9 +197,9 @@ public class TheListener implements Listener
 		if ( ! (entity instanceof Player)) return;
 		
 		Player player = (Player) entity;		
-		VPlayer vplayer = VPlayer.get(player);
+		UPlayer uplayer = UPlayer.get(player);
 		
-		if (vplayer.isVampire())
+		if (uplayer.isVampire())
 		{
 			event.setCancelled(true);
 			PlayerUtil.sendHealthFoodUpdatePacket(player);
@@ -199,8 +214,8 @@ public class TheListener implements Listener
 	public void updateOnJoin(PlayerJoinEvent event)
 	{
 		final Player player = event.getPlayer();
-		final VPlayer vplayer = VPlayer.get(player);
-		vplayer.update();
+		final UPlayer uplayer = UPlayer.get(player);
+		uplayer.update();
 	}
 	
 	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
@@ -208,13 +223,13 @@ public class TheListener implements Listener
 	{
 		final Player player = event.getPlayer();
 		
-		Bukkit.getScheduler().scheduleSyncDelayedTask(p, new Runnable()
+		Bukkit.getScheduler().scheduleSyncDelayedTask(Vampire.get(), new Runnable()
 		{
 			@Override
 			public void run()
 			{
-				VPlayer vplayer = VPlayer.get(player);
-				vplayer.update();
+				UPlayer uplayer = UPlayer.get(player);
+				uplayer.update();
 			}
 		});
 	}
@@ -223,48 +238,48 @@ public class TheListener implements Listener
 	public void updateOnDeath(EntityDeathEvent event)
 	{
 		// If a vampire dies ...
-		VPlayer vplayer = VPlayer.get(event.getEntity());
-		if (vplayer == null) return;
-		if (vplayer.isVampire() == false) return;
+		UPlayer uplayer = UPlayer.get(event.getEntity());
+		if (uplayer == null) return;
+		if (uplayer.isVampire() == false) return;
 		
 		// Close down bloodlust.
-		vplayer.setRad(0);
-		vplayer.setTemp(0);
-		vplayer.setBloodlusting(false);
+		uplayer.setRad(0);
+		uplayer.setTemp(0);
+		uplayer.setBloodlusting(false);
 	}
 	
 	@EventHandler(priority = EventPriority.NORMAL, ignoreCancelled = true)
 	public void updateOnRespawn(PlayerRespawnEvent event)
 	{
 		// If the player is a vampire ...
-		final VPlayer vplayer = VPlayer.get(event.getPlayer());
-		if (vplayer == null) return;
-		if ( ! vplayer.isVampire()) return;
+		final UPlayer uplayer = UPlayer.get(event.getPlayer());
+		if (uplayer == null) return;
+		if ( ! uplayer.isVampire()) return;
 		
 		// ... modify food and health levels and force another speed-update.
-		Bukkit.getScheduler().scheduleSyncDelayedTask(p, new Runnable()
+		Bukkit.getScheduler().scheduleSyncDelayedTask(Vampire.get(), new Runnable()
 		{
 			@Override
 			public void run()
 			{
-				Player player = vplayer.getPlayer();
+				Player player = uplayer.getPlayer();
 				if (player == null) return;
-				Conf conf = Conf.get(player);
-				player.setFoodLevel(conf.updateRespawnFood);
-				player.setHealth(conf.updateRespawnHealth);
+				UConf uconf = UConf.get(player);
+				player.setFoodLevel(uconf.updateRespawnFood);
+				player.setHealth(uconf.updateRespawnHealth);
 				PlayerUtil.sendHealthFoodUpdatePacket(player);
-				vplayer.update();
+				uplayer.update();
 			}
 		});
 	}
 	
 	public void updateNameColor(Player player)
 	{
-		Conf conf = Conf.get(player); 
-		if (conf.updateNameColor == false) return;
-		VPlayer vplayer = VPlayer.get(player);
-		if ( ! vplayer.isVampire()) return;
-		player.setDisplayName(conf.updateNameColorTo.toString()+ChatColor.stripColor(player.getDisplayName()));
+		UConf uconf = UConf.get(player); 
+		if (uconf.updateNameColor == false) return;
+		UPlayer uplayer = UPlayer.get(player);
+		if ( ! uplayer.isVampire()) return;
+		player.setDisplayName(uconf.updateNameColorTo.toString()+ChatColor.stripColor(player.getDisplayName()));
 	}
 	
 	@EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
@@ -295,12 +310,12 @@ public class TheListener implements Listener
 	{
 		// If a non-creative player ...
 		Player player = event.getPlayer();
-		Conf conf = Conf.get(player);
+		UConf uconf = UConf.get(player);
 		if (player != null && player.getGameMode() == GameMode.CREATIVE) return;
 		
 		// ... broke a self-dropping block ...  
 		Material material = event.getBlock().getType();
-		if ( ! conf.dropSelfMaterials.contains(material)) return;
+		if ( ! uconf.dropSelfMaterials.contains(material)) return;
 		
 		// ... then we make it drop itself.	
 		event.setCancelled(true);
@@ -325,18 +340,18 @@ public class TheListener implements Listener
 		if (from.equals(to)) return;
 		
 		// ... and that player is a vampire ...
-		VPlayer vplayer = VPlayer.get(player);
-		if (vplayer.isHuman()) return;
+		UPlayer uplayer = UPlayer.get(player);
+		if (uplayer.isHuman()) return;
 		
 		// ... that has bloodlust on ...
-		if ( ! vplayer.isBloodlusting()) return;
+		if ( ! uplayer.isBloodlusting()) return;
 		
 		// ... then spawn smoke trail.
-		Conf conf = Conf.get(player);
+		UConf uconf = UConf.get(player);
 		Location one = event.getFrom().clone();
 		Location two = one.clone().add(0, 1, 0);
-		long count1 = MUtil.probabilityRound(conf.bloodlustSmokes);
-		long count2 = MUtil.probabilityRound(conf.bloodlustSmokes);
+		long count1 = MUtil.probabilityRound(uconf.bloodlustSmokes);
+		long count2 = MUtil.probabilityRound(uconf.bloodlustSmokes);
 		for (long i = count1; i > 0; i--) FxUtil.smoke(one);
 		for (long i = count2; i > 0; i--) FxUtil.smoke(two);
 	}
@@ -349,8 +364,8 @@ public class TheListener implements Listener
 		
 		// ... turn of bloodlust ...
 		Player player = event.getPlayer();
-		VPlayer vplayer = VPlayer.get(player);
-		vplayer.setBloodlusting(false);
+		UPlayer uplayer = UPlayer.get(player);
+		uplayer.setBloodlusting(false);
 	}
 	
 	// -------------------------------------------- //
@@ -364,18 +379,18 @@ public class TheListener implements Listener
 		if ( ! (event.getTarget() instanceof Player)) return;
 		
 		Player player = (Player)event.getTarget();
-		Conf conf = Conf.get(player);
+		UConf uconf = UConf.get(player);
 		
 		// ... by creature that cares about the truce with vampires ...
-		if ( ! (conf.truceEntityTypes.contains(event.getEntityType()))) return;
+		if ( ! (uconf.truceEntityTypes.contains(event.getEntityType()))) return;
 		
-		VPlayer vplayer = VPlayer.get(player);
+		UPlayer uplayer = UPlayer.get(player);
 		
 		// ... and that player is a vampire ...
-		if ( ! vplayer.isVampire()) return;
+		if ( ! uplayer.isVampire()) return;
 		
 		// ... that has not recently done something to break the truce...
-		if (vplayer.truceIsBroken()) return;
+		if (uplayer.truceIsBroken()) return;
 		
 		// ... then if the player is a ghast target nothing ...
 		if (event.getEntityType() == EntityType.GHAST)
@@ -396,11 +411,11 @@ public class TheListener implements Listener
 		
 		// ... to a creature that cares about the truce with vampires...
 		Entity entity = event.getEntity();
-		Conf conf = Conf.get(entity);
-		if ( ! (conf.truceEntityTypes.contains(entity.getType()))) return;
+		UConf uconf = UConf.get(entity);
+		if ( ! (uconf.truceEntityTypes.contains(entity.getType()))) return;
 		
 		// ... and the liable damager is a vampire ...
-		VPlayer vpdamager = VPlayer.get(MUtil.getLiableDamager(event));
+		UPlayer vpdamager = UPlayer.get(MUtil.getLiableDamager(event));
 		if (vpdamager == null) return;
 		if ( ! vpdamager.isVampire()) return;
 		
@@ -416,7 +431,7 @@ public class TheListener implements Listener
 	public void regen(EntityDamageEvent event)
 	{
 		// If the damagee is a vampire ...
-		VPlayer vampire = VPlayer.get(event.getEntity());
+		UPlayer vampire = UPlayer.get(event.getEntity());
 		if (vampire == null) return;
 		if ( ! vampire.isVampire()) return;
 		
@@ -438,19 +453,19 @@ public class TheListener implements Listener
 		Entity damagerEntity = MUtil.getLiableDamager(event);
 		if ( ! (damagerEntity instanceof HumanEntity)) return;
 		HumanEntity damager = (HumanEntity) damagerEntity;
-		Conf conf = Conf.get(damager);
+		UConf uconf = UConf.get(damager);
 		
 		// ... and the damagee is a vampire ...
-		VPlayer vampire = VPlayer.get(event.getEntity());
+		UPlayer vampire = UPlayer.get(event.getEntity());
 		if (vampire == null) return;
 		if ( ! vampire.isVampire()) return;
 		
 		// ... and a wooden item was used ...
 		Material itemMaterial = damager.getItemInHand().getType();
-		if ( ! conf.combatWoodMaterials.contains(itemMaterial)) return;
+		if ( ! uconf.combatWoodMaterials.contains(itemMaterial)) return;
 		
 		// ... Then modify damage!
-		event.setDamage(conf.combatWoodDamage);
+		event.setDamage(uconf.combatWoodDamage);
 	}
 	
 	@EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
@@ -460,7 +475,7 @@ public class TheListener implements Listener
 		if ( ! MUtil.isCloseCombatEvent(event)) return;
 		
 		// ... and the liable damager is a vampire ...
-		VPlayer vampire = VPlayer.get(MUtil.getLiableDamager(event));
+		UPlayer vampire = UPlayer.get(MUtil.getLiableDamager(event));
 		if (vampire == null) return;
 		if ( ! vampire.isVampire()) return;
 		
@@ -481,13 +496,13 @@ public class TheListener implements Listener
 		if ( ! MUtil.isCloseCombatEvent(event)) return;
 		
 		// ... where there is one vampire and one non-vampire ...
-		VPlayer vpdamagee = VPlayer.get(event.getEntity());
+		UPlayer vpdamagee = UPlayer.get(event.getEntity());
 		if (vpdamagee == null) return;
-		VPlayer vpdamager = VPlayer.get(MUtil.getLiableDamager(event));
+		UPlayer vpdamager = UPlayer.get(MUtil.getLiableDamager(event));
 		if (vpdamager == null) return;
 		
-		VPlayer vampire = null;
-		VPlayer human = null;
+		UPlayer vampire = null;
+		UPlayer human = null;
 		
 		if (vpdamagee.isVampire())
 		{
@@ -510,10 +525,10 @@ public class TheListener implements Listener
 		if ( vampire == null || human == null) return;
 		
 		// ... and the vampire is allowed to infect through combat ...
-		if ( ! VPerm.COMBAT_INFECT.has(vampire.getPlayer())) return;
+		if ( ! Perm.COMBAT_INFECT.has(vampire.getPlayer())) return;
 		
 		// ... and the human is allowed to contract through combat ...
-		if ( ! VPerm.COMBAT_CONTRACT.has(human.getPlayer())) return;
+		if ( ! Perm.COMBAT_CONTRACT.has(human.getPlayer())) return;
 		
 		// ... Then there is a risk for infection ...
 		if (MCore.random.nextDouble() > vampire.combatInfectRisk()) return;
@@ -530,22 +545,22 @@ public class TheListener implements Listener
 	public void foodCake(PlayerInteractEvent event)
 	{
 		Player player = event.getPlayer();
-		Conf conf = Conf.get(player);
+		UConf uconf = UConf.get(player);
 		
 		// If cake eating is not allowed for vampires ...
-		if (conf.foodCakeAllowed) return;
+		if (uconf.foodCakeAllowed) return;
 		
 		// .. and the player right-clicks a cake block ...
 		if (event.getAction() != Action.RIGHT_CLICK_BLOCK) return;
 		if (event.getClickedBlock().getType() != Material.CAKE_BLOCK) return;
 		
 		// ... and the player is a vampire ...
-		VPlayer vplayer = VPlayer.get(player);
-		if ( ! vplayer.isVampire()) return;
+		UPlayer uplayer = UPlayer.get(player);
+		if ( ! uplayer.isVampire()) return;
 		
 		// ... we deny!
 		event.setCancelled(true);
-		vplayer.msg(Lang.foodCantEat, "cake");
+		uplayer.msg(MLang.get().foodCantEat, "cake");
 	}
 	
 	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
@@ -557,10 +572,10 @@ public class TheListener implements Listener
 		// ... to a living entity ...
 		if ( ! (event.getEntity() instanceof LivingEntity)) return;
 		LivingEntity damagee = (LivingEntity)event.getEntity();
-		Conf conf = Conf.get(damagee);
+		UConf uconf = UConf.get(damagee);
 		
 		// ... of a tasty type ...
-		Double fullFoodQuotient = conf.entityTypeFullFoodQuotient.get(damagee.getType());
+		Double fullFoodQuotient = uconf.entityTypeFullFoodQuotient.get(damagee.getType());
 		if (fullFoodQuotient == null || fullFoodQuotient == 0) return;
 		
 		// ... that has blood left ...
@@ -568,7 +583,7 @@ public class TheListener implements Listener
 		if (damagee.isDead()) return;
 		
 		// ... and the liable damager is a vampire ...
-		VPlayer vampire = VPlayer.get(MUtil.getLiableDamager(event));
+		UPlayer vampire = UPlayer.get(MUtil.getLiableDamager(event));
 		if (vampire == null) return;
 		if ( ! vampire.isVampire()) return;
 		
@@ -598,7 +613,7 @@ public class TheListener implements Listener
 	{
 		// If this projectile is a thrown potion ...
 		Projectile projectile = event.getEntity();
-		Conf conf = Conf.get(projectile);
+		UConf uconf = UConf.get(projectile);
 		if ( ! (projectile instanceof ThrownPotion)) return;
 		ThrownPotion thrownPotion = (ThrownPotion)projectile;
 		
@@ -612,31 +627,31 @@ public class TheListener implements Listener
 		// ... then to all nearby players ...
 		for (Player player : splashLocation.getWorld().getPlayers())
 		{
-			if (player.getLocation().distance(splashLocation) > conf.holyWaterSplashRadius) continue;
-			VPlayer vplayer = VPlayer.get(player);
-			vplayer.msg(Lang.holyWaterCommon, shooter.getDisplayName());
-			vplayer.runFxEnderBurst();
+			if (player.getLocation().distance(splashLocation) > uconf.holyWaterSplashRadius) continue;
+			UPlayer uplayer = UPlayer.get(player);
+			uplayer.msg(MLang.get().holyWaterCommon, shooter.getDisplayName());
+			uplayer.runFxEnderBurst();
 			
 			// Trigger a damage event so other plugins can cancel this.
 			EntityDamageByEntityEvent triggeredEvent = new EntityDamageByEntityEvent(projectile.getShooter(), player, DamageCause.CUSTOM, 1D);
 			Bukkit.getPluginManager().callEvent(triggeredEvent);
 			if (triggeredEvent.isCancelled()) continue;
 			
-			if (vplayer.isHealthy())
+			if (uplayer.isHealthy())
 			{
-				vplayer.msg(Lang.holyWaterHealthy);
+				uplayer.msg(MLang.get().holyWaterHealthy);
 			}
-			else if (vplayer.isInfected())
+			else if (uplayer.isInfected())
 			{
-				vplayer.msg(Lang.holyWaterInfected);
-				vplayer.setInfection(0);
-				vplayer.runFxEnder();
+				uplayer.msg(MLang.get().holyWaterInfected);
+				uplayer.setInfection(0);
+				uplayer.runFxEnder();
 			}
-			else if (vplayer.isVampire())
+			else if (uplayer.isVampire())
 			{
-				vplayer.msg(Lang.holyWaterVampire);
-				vplayer.addTemp(conf.holyWaterTemp);
-				vplayer.runFxFlameBurst();
+				uplayer.msg(MLang.get().holyWaterVampire);
+				uplayer.addTemp(uconf.holyWaterTemp);
+				uplayer.runFxFlameBurst();
 			}
 		}
 	}	
@@ -654,10 +669,10 @@ public class TheListener implements Listener
 		
 		// ... run altar logic.
 		Player player = event.getPlayer();
-		Conf conf = Conf.get(player);
+		UConf uconf = UConf.get(player);
 		
-		conf.altarDark.evalBlockUse(event.getClickedBlock(), player);
-		conf.altarLight.evalBlockUse(event.getClickedBlock(), player);
+		uconf.altarDark.evalBlockUse(event.getClickedBlock(), player);
+		uconf.altarLight.evalBlockUse(event.getClickedBlock(), player);
 	}
 	
 }

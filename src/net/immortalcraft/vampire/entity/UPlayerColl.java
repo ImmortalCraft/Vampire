@@ -1,20 +1,21 @@
-package net.immortalcraft.vampire;
+package net.immortalcraft.vampire.entity;
 
 import java.util.Collection;
 
 import com.massivecraft.mcore.Predictate;
 import com.massivecraft.mcore.store.MStore;
 import com.massivecraft.mcore.store.SenderColl;
+import net.immortalcraft.vampire.Vampire;
 
-public class VPlayerColl extends SenderColl<VPlayer>
+public class UPlayerColl extends SenderColl<UPlayer>
 {
 	// -------------------------------------------- //
 	// CONSTRUCT
 	// -------------------------------------------- //
 	
-	public VPlayerColl(String name)
+	public UPlayerColl(String name)
 	{
-		super(name, VPlayer.class, MStore.getDb(ConfServer.dburi), P.p);
+		super(name, UPlayer.class, MStore.getDb(), Vampire.get());
 	}
 	
 	// -------------------------------------------- //
@@ -22,7 +23,7 @@ public class VPlayerColl extends SenderColl<VPlayer>
 	// -------------------------------------------- //
 	
 	@Override
-	public boolean isDefault(VPlayer entity)
+	public boolean isDefault(UPlayer entity)
 	{
 		if (entity.isVampire()) return false;
 		if (entity.isInfected()) return false;
@@ -30,22 +31,22 @@ public class VPlayerColl extends SenderColl<VPlayer>
 	}
 	
 	
-	public Collection<VPlayer> getAllOnlineInfected()
+	public Collection<UPlayer> getAllOnlineInfected()
 	{
-		return this.getAll(new Predictate<VPlayer>()
+		return this.getAll(new Predictate<UPlayer>()
 		{
-			public boolean apply(VPlayer entity)
+			public boolean apply(UPlayer entity)
 			{
 				return entity.isOnline() && entity.isInfected();
 			}
 		});
 	}
 	
-	public Collection<VPlayer> getAllOnlineVampires()
+	public Collection<UPlayer> getAllOnlineVampires()
 	{
-		return this.getAll(new Predictate<VPlayer>()
+		return this.getAll(new Predictate<UPlayer>()
 		{
-			public boolean apply(VPlayer entity)
+			public boolean apply(UPlayer entity)
 			{
 				return entity.isOnline() && entity.isVampire();
 			}

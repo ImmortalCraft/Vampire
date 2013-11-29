@@ -1,12 +1,13 @@
 package net.immortalcraft.vampire.util;
 
+import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.World.Environment;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
-import net.immortalcraft.vampire.Conf;
+import net.immortalcraft.vampire.entity.UConf;
 
 public class SunUtil
 {
@@ -73,6 +74,7 @@ public class SunUtil
 	/**
 	 * The sum of the opacity above and including the block.
 	 */
+	@SuppressWarnings("deprecation")
 	public static double calcTerrainOpacity(Block block)
 	{
 		double ret = 0;
@@ -85,7 +87,7 @@ public class SunUtil
 		for (int y = block.getY(); y <= maxy && ret < 1d; y++)
 		{
 			int typeId = world.getBlockTypeIdAt(x, y, z);
-			Double opacity = Conf.get(block).typeIdOpacity.get(typeId);
+			Double opacity = UConf.get(block).typeIdOpacity.get(typeId);
 			if (opacity == null)
 			{
 				opacity = 1d; // Blocks not in that map have opacity 1;
@@ -115,8 +117,8 @@ public class SunUtil
 		{
 			if (itemStack == null) continue;
 			if (itemStack.getAmount() == 0) continue;
-			if (itemStack.getTypeId() == 0) continue;
-			ret += Conf.get(player).opacityPerArmorPiece;
+			if (itemStack.getType() == Material.AIR) continue;
+			ret += UConf.get(player).opacityPerArmorPiece;
 		}
 		return ret;
 	}
@@ -154,4 +156,5 @@ public class SunUtil
 		//P.p.log("calcPlayerIrradiation",ret);
 		return ret;
 	}
+	
 }

@@ -1,9 +1,5 @@
 package net.immortalcraft.vampire.cmd;
 
-import net.immortalcraft.vampire.VPlayerColls;
-import net.immortalcraft.vampire.VPlayer;
-import net.immortalcraft.vampire.P;
-import net.immortalcraft.vampire.VPerm;
 import java.util.*;
 
 import org.bukkit.ChatColor;
@@ -14,19 +10,34 @@ import com.massivecraft.mcore.cmd.VisibilityMode;
 import com.massivecraft.mcore.cmd.arg.ARInteger;
 import com.massivecraft.mcore.cmd.req.ReqHasPerm;
 import com.massivecraft.mcore.util.Txt;
+import net.immortalcraft.vampire.*;
+import net.immortalcraft.vampire.entity.UPlayer;
+import net.immortalcraft.vampire.entity.UPlayerColls;
 
-public class CmdList extends VCommand
-{	
-	public CmdList()
+public class CmdVampireList extends VCommand
+{
+	// -------------------------------------------- //
+	// CONSTRUCT
+	// -------------------------------------------- //
+	
+	public CmdVampireList()
 	{
+		// Aliases
 		this.addAliases("l", "list");
+		
+		// Args
 		this.addOptionalArg("page", "1");
 		this.addOptionalArg("universe", "you");
 		
 		this.setVisibilityMode(VisibilityMode.SECRET);
 		
-		this.addRequirements(ReqHasPerm.get(VPerm.LIST.node));
+		// Requirements
+		this.addRequirements(ReqHasPerm.get(Perm.LIST.node));
 	}
+	
+	// -------------------------------------------- //
+	// OVERRIDE
+	// -------------------------------------------- //
 	
 	@Override
 	public void perform()
@@ -34,7 +45,7 @@ public class CmdList extends VCommand
 		Integer pageHumanBased = this.arg(0, ARInteger.get(), 1);
 		if (pageHumanBased == null) return;
 		
-		Multiverse mv = P.p.playerAspect.getMultiverse();
+		Multiverse mv = Vampire.get().playerAspect.getMultiverse();
 		String universe = this.arg(1, mv.argReaderUniverse(), senderIsConsole ? MCore.DEFAULT : mv.getUniverse(me));
 		if (universe == null) return;
 		
@@ -43,28 +54,28 @@ public class CmdList extends VCommand
 		List<String> infectedOnline = new ArrayList<String>();
 		List<String> infectedOffline = new ArrayList<String>();
 		
-		for (VPlayer vplayer : VPlayerColls.i.getForUniverse(universe).getAll())
+		for (UPlayer uplayer : UPlayerColls.get().getForUniverse(universe).getAll())
 		{
-			if (vplayer.isVampire())
+			if (uplayer.isVampire())
 			{
-				if (vplayer.isOnline())
+				if (uplayer.isOnline())
 				{
-					vampiresOnline.add(ChatColor.WHITE.toString() + vplayer.getDisplayName());
+					vampiresOnline.add(ChatColor.WHITE.toString() + uplayer.getDisplayName());
 				}
 				else
 				{
-					vampiresOffline.add(ChatColor.WHITE.toString() + vplayer.getDisplayName());
+					vampiresOffline.add(ChatColor.WHITE.toString() + uplayer.getDisplayName());
 				}
 			}
-			else if (vplayer.isInfected())
+			else if (uplayer.isInfected())
 			{
-				if (vplayer.isOnline())
+				if (uplayer.isOnline())
 				{
-					infectedOnline.add(ChatColor.WHITE.toString() + vplayer.getDisplayName());
+					infectedOnline.add(ChatColor.WHITE.toString() + uplayer.getDisplayName());
 				}
 				else
 				{
-					infectedOffline.add(ChatColor.WHITE.toString() + vplayer.getDisplayName());
+					infectedOffline.add(ChatColor.WHITE.toString() + uplayer.getDisplayName());
 				}
 			}
 		}
@@ -98,6 +109,7 @@ public class CmdList extends VCommand
 		
 		// Send them
 		lines = Txt.parseWrap(lines);
-		this.sendMessage(Txt.getPage(lines, pageHumanBased, Txt.upperCaseFirst("Medieval")+" Vampire Players", sender));	
+		this.sendMessage(Txt.getPage(lines, pageHumanBased, Txt.upperCaseFirst(universe)+" Vampire Players", sender));	
 	}
+	
 }

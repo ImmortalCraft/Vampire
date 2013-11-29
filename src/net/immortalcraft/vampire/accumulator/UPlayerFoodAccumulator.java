@@ -3,13 +3,13 @@ package net.immortalcraft.vampire.accumulator;
 import org.bukkit.entity.Player;
 
 import com.massivecraft.mcore.util.PlayerUtil;
-import net.immortalcraft.vampire.VPlayer;
+import net.immortalcraft.vampire.entity.UPlayer;
 
-public class VPlayerFoodAccumulator extends VPlayerAccumulator
+public class UPlayerFoodAccumulator extends UPlayerAccumulator
 {
-	public VPlayerFoodAccumulator(VPlayer vplayer)
+	public UPlayerFoodAccumulator(UPlayer uplayer)
 	{
-		super(vplayer);
+		super(uplayer);
 		this.setMin(0);
 		this.setMax(20);
 	}
@@ -17,16 +17,17 @@ public class VPlayerFoodAccumulator extends VPlayerAccumulator
 	@Override
 	protected int real()
 	{
-		Player player = this.vplayer.getPlayer();
+		Player player = this.uplayer.getPlayer();
 		if (player == null) return 0;
 		return player.getFoodLevel();
 	}
 	@Override
 	protected void real(int val)
 	{
-		Player player = this.vplayer.getPlayer();
+		Player player = this.uplayer.getPlayer();
 		if (player == null) return;
 		player.setFoodLevel(val);
 		PlayerUtil.sendHealthFoodUpdatePacket(player);
 	}
+	
 }
